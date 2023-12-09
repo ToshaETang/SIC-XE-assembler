@@ -20,32 +20,92 @@ char* getSection(char* text, int i, char *section, int j){
 }
 
 
-//==============================================================
+int isInOPTAB(char* OPCODE, FILE* OPTAB){
+    char* text = malloc(100*sizeof(char));
+    while(fgets(text,100,OPTAB) != NULL){
+        char* tmp = malloc(20*sizeof(char));
+        tmp = getSection(text, 0, tmp, 0);
+        if(strcmp(OPCODE, tmp) == 0){
+            return 1;
+        }
+    }
+    return 0;
+}
 
+
+//==============================================================
 
 int main()
 {   
     printf("START!!!!!!!\n");
 
-    //read input file
+    int LOCCTER;
+    int STARTADDRESS;
+
+
+    //open file
     FILE* inputFile;
-    inputFile = fopen ("inputFile.txt", "r"); 
+    inputFile = fopen ("inputFile.txt", "r"); // read
+    FILE* OPTAB;
+    OPTAB = fopen ("OPTAB.txt", "r"); // read
+    FILE* SYMTAB;
+    SYMTAB = fopen ("SYMTAB.txt", "w+"); //overwrite or create
+    FILE* resultFile;
+    resultFile = fopen ("resultFile.txt", "w+"); //overwrite or create
+    FILE* interMediateFile;
+    interMediateFile = fopen ("interMediateFile.txt", "w+"); //overwrite or create
+
+
     char* text = malloc(100*sizeof(char));
     
-    while(fgets(text,100,inputFile) != NULL){
-        //printf("text[1]=%c  len=%d\n", text[1], strlen(text));
-        //printf("%s\n",text);
-        char* text_1 = malloc(20*sizeof(char)); //eg. FIRST
-        char* text_2 = malloc(20*sizeof(char)); //eg. STL
-        char* text_3 = malloc(20*sizeof(char)); //eg. RETADR
 
-        //seperate the line
-        text_1 = getSection(text, 0, text_1, 0);
-        //printf("text_1 = %s  |  ",text_1, strlen(text_1));
-        text_2 = getSection(text, strlen(text_1)+1, text_2, 0);
-        //printf("text_2 = %s  |  ",text_2, strlen(text_2));
-        text_3 = getSection(text, strlen(text_1)+strlen(text_2)+2, text_3, 0);
-        //printf("text_3 = %s\n",text_3);
+    while(fgets(text,100,inputFile) != NULL){
+
+        //printf("%s\n",text);
+        char* LABEL = malloc(20*sizeof(char)); //eg. FIRST
+        char* OPCODE = malloc(20*sizeof(char)); //eg. STL
+        char* OPERAND = malloc(20*sizeof(char)); //eg. RETADR
+
+        //seperate the input line
+        LABEL = getSection(text, 0, LABEL, 0);
+        OPCODE = getSection(text, strlen(LABEL)+1, OPCODE, 0);
+        OPERAND = getSection(text, strlen(LABEL)+strlen(OPCODE)+2, OPERAND, 0);
+        //printf("LABEL = %s  |  ",LABEL);
+        //printf("OPCODE =%s|  ",OPCODE);
+        //printf("OPERAND = %s\n",OPERAND);
+
+        //-------------
+
+        // OPCODE is START
+        if(strcmp(OPCODE, "START")==0){
+            STARTADDRESS = atoi(OPERAND); // str->int
+            LOCCTER = STARTADDRESS;
+            continue;
+        }else{
+            LOCCTER = 0;
+        }
+
+
+        //-------------
+        // OPCODE is not END
+        if(strcmp(OPCODE, "END") != 0){
+            if(strcmp(LABEL, "") != 0){
+                char sLOCCTER[20];
+                itoa(LOCCTER, sLOCCTER, 16); // 10->16  int->str
+                fprintf(SYMTAB, "%s %s\n", LABEL, sLOCCTER);
+            }
+            
+            //search OPTAB
+            if(isInOPTAB(OPCODE,OPTAB) == 1){ //IN OPTAB
+                //printf("%s IS IN OPTAB\n",OPCODE);
+
+            }else{ //NOT IN OPTAB
+                //printf("%s IS NOT IN OPTAB\n",OPCODE);
+            }
+            rewind(OPTAB);
+            //strcmp(OPCODE, "RESW")==0 || strcmp(OPCODE, "RESB")==0 || strcmp(OPCODE, "BYTE")==0
+            
+        }//if(strcmp(OPCODE, "END") != 0)
 
 
 
@@ -53,15 +113,15 @@ int main()
 
     }//while(fgets(text,100,inputFile) != NULL)
 
-
-
-    //open result file
-    FILE* resultFile;
-    resultFile = fopen ("resultFile.txt", "w"); 
+     
 
 
     //----------------------------
     fclose(inputFile);
     fclose(resultFile);
+    fclose(SYMTAB);
+    fclose(OPTAB);
+    fclose(interMediateFile);
+    
     return(0);
 }
