@@ -16,6 +16,7 @@ char* getSection(char* text, int textIndex, char *section, int sectionIndex){
         }
         section[sectionIndex] = '\0';
     }
+    
     return section;
 }
 
@@ -37,12 +38,12 @@ void printTAB(char* fileName){
     FILE* TAB;
     TAB = fopen(fileName,"r"); // read
 
-    printf("--------------------------\n");
+    printf("\n  ------------THIS IS %s------------\n",fileName);
     char* tmp = malloc(100*sizeof(char));
     while(fgets(tmp,100,TAB) != NULL){
-        printf("%s\n",tmp);
+        printf("  %s\n",tmp);
     }
-    printf("--------------------------\n");
+    printf("  -----------------------------------\n");
 
     fclose(TAB);
 }
@@ -52,29 +53,30 @@ void printTAB(char* fileName){
 
 int main()
 {   
-    printf("START!!!!!!!\n");
+    printf("\n  START TOSHA'S ASSEMMMBLER ^O^\n");
 
     int LOCCTER;
+    char sLOCCTER[20];
     int STARTADDRESS;
 
 
     //open file
-    FILE* inputFile;
-    inputFile = fopen("inputFile.txt", "r"); // read
+    FILE* INPUTFILE;
+    INPUTFILE = fopen("inputFile.txt", "r"); // read
     FILE* OPTAB;
     OPTAB = fopen("OPTAB.txt", "r"); // read
     FILE* SYMTAB;
     SYMTAB = fopen("SYMTAB.txt", "w+"); //overwrite or create
-    FILE* resultFile;
-    resultFile = fopen("resultFile.txt", "w+"); //overwrite or create
-    FILE* interMediateFile;
-    interMediateFile = fopen("interMediateFile.txt", "w+"); //overwrite or create
+    FILE* RESULTFILE;
+    RESULTFILE = fopen("resultFile.txt", "w+"); //overwrite or create
+    FILE* MIDFILE;
+    MIDFILE = fopen("MIDFILE.txt", "w+"); //overwrite or create
 
 
     char* text = malloc(100*sizeof(char));
     
     // 【start pass 1】
-    while(fgets(text,100,inputFile) != NULL){
+    while(fgets(text,100,INPUTFILE) != NULL){
 
         //printf("%s\n",text);
         char* LABEL = malloc(20*sizeof(char));
@@ -86,7 +88,7 @@ int main()
         OPCODE = getSection(text, strlen(LABEL)+1, OPCODE, 0);
         OPERAND = getSection(text, strlen(LABEL)+strlen(OPCODE)+2, OPERAND, 0);
         //printf("LABEL = %s  |  ",LABEL);
-        //printf("OPCODE =%s|  ",OPCODE);
+        //printf("OPCODE = %s|  ",OPCODE);
         //printf("OPERAND = %s\n",OPERAND);
 
         //-------------make SYMTAB--------------------------
@@ -95,16 +97,19 @@ int main()
         if(strcmp(OPCODE, "START")==0){
             STARTADDRESS = atoi(OPERAND); // str->int
             LOCCTER = STARTADDRESS;
+            itoa(LOCCTER, sLOCCTER, 16); // 10->16, int->str
+            fprintf(MIDFILE, "%s\t%s\t%s\t%s\n", sLOCCTER, LABEL, OPCODE, OPERAND);
             continue;
         }
 
+        itoa(LOCCTER, sLOCCTER, 16); // 10->16, int->str
+        fprintf(MIDFILE, "%s\t%s\t%s\t%s\n", sLOCCTER, LABEL, OPCODE, OPERAND);
 
         // OPCODE is not END
         if(strcmp(OPCODE, "END") != 0){
-
+           
             // save LABEL's LOCCTER 
             if(strcmp(LABEL, "") != 0){
-                char sLOCCTER[20];
                 itoa(LOCCTER, sLOCCTER, 16); // 10->16, int->str
                 fprintf(SYMTAB, "%s %s\n", LABEL, sLOCCTER);
             }
@@ -139,22 +144,24 @@ int main()
             rewind(OPTAB);  // reread file
 
         }// OPCODE is not END
-
+        
     }// 【end pass 1】
-
-    fclose(SYMTAB); // save file
+    
+    fclose(SYMTAB); // save SYMTAB file
+    fclose(MIDFILE); // save MIDFILE file
 
     printTAB("SYMTAB.txt");
+    printTAB("MIDFILE.txt");
 
     //-------------finish SYMTAB--------------------------
 
 
 
     //----------------------------------------------------
-    fclose(inputFile);
-    fclose(resultFile);
+    fclose(INPUTFILE);
+    fclose(RESULTFILE);
     fclose(OPTAB);
-    fclose(interMediateFile);
+    
     
     return(0);
 }
