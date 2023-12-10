@@ -58,6 +58,7 @@ int main()
     int LOCCTER;
     char sLOCCTER[20];
     int STARTADDRESS;
+    int PROGRAMLENGTH;
 
 
     //open file
@@ -67,8 +68,6 @@ int main()
     OPTAB = fopen("OPTAB.txt", "r"); // read
     FILE* SYMTAB;
     SYMTAB = fopen("SYMTAB.txt", "w+"); //overwrite or create
-    FILE* RESULTFILE;
-    RESULTFILE = fopen("resultFile.txt", "w+"); //overwrite or create
     FILE* MIDFILE;
     MIDFILE = fopen("MIDFILE.txt", "w+"); //overwrite or create
 
@@ -91,7 +90,6 @@ int main()
         //printf("OPCODE = %s|  ",OPCODE);
         //printf("OPERAND = %s\n",OPERAND);
 
-        //-------------make SYMTAB--------------------------
 
         // OPCODE is START
         if(strcmp(OPCODE, "START")==0){
@@ -146,19 +144,28 @@ int main()
         }// OPCODE is not END
         
     }// 【end pass 1】
-    
+    PROGRAMLENGTH = (LOCCTER) - STARTADDRESS;
+
     fclose(SYMTAB); // save SYMTAB file
     fclose(MIDFILE); // save MIDFILE file
+    fclose(INPUTFILE);
 
     printTAB("SYMTAB.txt");
     printTAB("MIDFILE.txt");
+    
+    printf("  PROGRAMLENGTH = %d (%s)\n",PROGRAMLENGTH,itoa(LOCCTER, sLOCCTER, 16));
 
-    //-------------finish SYMTAB--------------------------
+
+    // 【start pass 2】
+
+    FILE* RESULTFILE;
+    RESULTFILE = fopen("resultFile.txt", "w+"); //overwrite or create
 
 
 
+    // 【end pass 2】
     //----------------------------------------------------
-    fclose(INPUTFILE);
+    
     fclose(RESULTFILE);
     fclose(OPTAB);
     
