@@ -23,7 +23,6 @@ void changeInputFile(){
         token1 = strtok(line, "\t\n");
         token2 = strtok(NULL, "\t\n");
         token3 = strtok(NULL, "\t\n");
-        //printf("token1:%s| token2:%s| token3:%s| \n",token1,token2,token3);
         if(token3==NULL) fprintf(inputFile, """\t%s\t%s\n",token1,token2);
         else fprintf(inputFile, "%s\t%s\t%s\n",token1,token2,token3);
     }
@@ -31,6 +30,7 @@ void changeInputFile(){
     fclose(file);
     fclose(inputFile);
 }
+
 
 
 char* getSection(char* text, int textIndex, char *section, int sectionIndex){
@@ -65,15 +65,14 @@ int isInOPTAB(char* OPCODE, FILE* OPTAB){
 }
 
 
+
 int isInSYMTAB(char* OPERAND2, FILE* SYMTAB){
     char* text = malloc(100*sizeof(char));
     while(fgets(text,100,SYMTAB) != NULL){
         char* tmp = malloc(20*sizeof(char));
         char* address = malloc(20*sizeof(char));
         tmp = getSection(text, 0, tmp, 0);
-        //printf("tmp = %s  ",tmp);
         address = getSection(text, strlen(tmp)+1, address, 0);
-        //printf("address = %s\n",address);
         if(strcmp(OPERAND2, tmp) == 0){
             int add = strtol(address, NULL, 10);
             return add;
@@ -82,9 +81,11 @@ int isInSYMTAB(char* OPERAND2, FILE* SYMTAB){
     return 0;
 }
 
+
+
 void printTAB(char* fileName){
     FILE* TAB;
-    TAB = fopen(fileName,"r"); // read
+    TAB = fopen(fileName,"r");
 
     printf("\n  ------------THIS IS %s------------\n",fileName);
     char* tmp = malloc(100*sizeof(char));
@@ -95,6 +96,7 @@ void printTAB(char* fileName){
 
     fclose(TAB);
 }
+
 
 
 int getCompareAdresss(char* OPCODE){
@@ -114,6 +116,8 @@ int getCompareAdresss(char* OPCODE){
     return 0;
 }
 
+
+
 int getCompareSymbolValue(char* OPERAND){
     FILE* SYMTAB = fopen("SYMTAB.txt","r");
     char* text = malloc(100*sizeof(char));
@@ -121,17 +125,16 @@ int getCompareSymbolValue(char* OPERAND){
     while(fgets(text,100,SYMTAB) != NULL){
         char* label = malloc(20*sizeof(char));
         label = getSection(text, 0, label, 0);
-        //printf("%s\n",label);
         if(strcmp(OPERAND, label) == 0){
             char* comsym = malloc(20*sizeof(char));
             int comsymbolvalue = strtol(getSection(text, strlen(label)+1, comsym, 0),NULL,16);
-            //printf("%x %d\n",comsymbol,comsymbol);
             return comsymbolvalue;
         }
     }
     fclose(SYMTAB);
     return 0;
 }
+
 
 
 int getPC(char* OPCODE){
@@ -143,17 +146,19 @@ int getPC(char* OPCODE){
         char* pc = malloc(20*sizeof(char));
         pc = getSection(text, 0, pc, 0);
         opcode = getSection(text, strlen(pc)+1, opcode, 0);
-        //printf("%s\n",label);
         if(strcmp(OPCODE, opcode) == 0){
             return strtol(pc,NULL,16);
         }
     }
     fclose(MIDFILE);
     return 0;
-
 }
 
+
+
 //==============================================================
+
+
 
 int main()
 {   
@@ -196,8 +201,6 @@ int main()
         LABEL = getSection(text, 0, LABEL, 0);
         OPCODE = getSection(text, strlen(LABEL)+1, OPCODE, 0);
         OPERAND = getSection(text, strlen(LABEL)+strlen(OPCODE)+2, OPERAND, 0);
-
-
         //printf("LABEL = %s  |  ",LABEL);
         //printf("OPCODE = %s|  ",OPCODE);
         //printf("OPERAND = %s\n",OPERAND);
@@ -266,6 +269,8 @@ int main()
 
     printf("\n  ===========END PASS 1=========== \n");
 
+
+
     // 【start pass 2】
     printf("\n  ===========START PASS 2=========== \n");
 
@@ -306,6 +311,7 @@ int main()
             invalidopcode = 1;
             PC = getPC(OPCODE2);
             //printf("%s:%x\n",OPCODE2,PC);
+
             //search OPCODE in OPTAB
             if(isInOPTAB(OPCODE2,OPTAB) == 1){ //IN OPTAB
                 if(strcmp(OPERAND2, "")!=0){ // there is OPERAND
@@ -325,7 +331,7 @@ int main()
                         P = 0;
                         E = 0;
                     }
-                    else{ // not format 2
+                    else{
                         if(OPCODE2[0]=='+'){
                             format = 4;
                             E = 1;
@@ -374,6 +380,8 @@ int main()
                         }
                     }
                 }
+
+
                 // generate
                 //printf("%x\n",getCompareAdresss(OPCODE2));
                 //int compareAdresss = getCompareAdresss(OPCODE2);
@@ -422,16 +430,16 @@ int main()
                         if(N==1 && I==1){
                             int compareSymbolValue = getCompareSymbolValue(OPERAND2);
                             //printf("%s compareSymbol:%x\n",OPERAND2, compareSymbolValue);
-                            //strcat(mncode,"_0");
                             itoa(compareAdresss,sobj,16);
                             strcat(mncode,sobj);
                         }
-                        //printf("%s mncode:%s\n",OPCODE2,mncode); !!!!!
+                        //printf("%s mncode:%s\n",OPCODE2,mncode); 
+                        // !! something goes WRONG !!
                     }
                 }
 
                 //printf("%s mncode:%s\n",OPCODE2,mncode);
-            }else if(strcmp(OPCODE2, "BYTE")==0){ // do not need "WORD"
+            }else if(strcmp(OPCODE2, "BYTE")==0){ 
                 format = 1;
                 if(OPERAND2[0]=='X'){
                     for(int i =0 ; OPERAND2[i]!='\0';i++){
@@ -452,7 +460,6 @@ int main()
                 }
             }
             printf("%s objectCode:%s\n",OPCODE2,mncode);
-
 
             rewind(OPTAB);  // reread file
             rewind(SYMTAB);
