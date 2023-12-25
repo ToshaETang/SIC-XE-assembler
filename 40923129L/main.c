@@ -20,9 +20,9 @@ void changeInputFile(){
     char* token3 = malloc(20*sizeof(char));
 
     while (fgets(line, sizeof(line), file) != NULL) {
-        token1 = strtok(line, " \t\n");
-        token2 = strtok(NULL, " \t\n");
-        token3 = strtok(NULL, " \t\n");
+        token1 = strtok(line, "\t\n");
+        token2 = strtok(NULL, "\t\n");
+        token3 = strtok(NULL, "\t\n");
         if(token3==NULL) fprintf(inputFile, """\t%s\t%s\n",token1,token2);
         else fprintf(inputFile, "%s\t%s\t%s\n",token1,token2,token3);
     }
